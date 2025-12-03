@@ -1,40 +1,25 @@
 ---
-title: "Decision Advocacy Challenge"
-subtitle: "Data-Driven Scheduling for Maximum Productivity"
+title: "Auto Shop Productivity Analysis Report for Patrick"
+subtitle: "Schedule recommendations for maximum productivity and revenue"
+author: "Gitesh Kubal"
+date: December 02, 2025
 format:
-  html: default
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    toc-title: "Contents"
+    number-sections: false
+    theme: cosmo
 execute:
   echo: true
   eval: true
 ---
 
-# 🔧 Decision Advocacy Challenge - Patrick's Auto Shop Analysis
-
-## Challenge Overview
-
-**Your Mission:** Create a concise, punchy Quarto document (aim for 1-5 printed pages) that analyzes historical productivity data from Patrick's auto shop network. Your report should give Patrick clear, actionable recommendations he can understand and use. Write it so an auto-mechanic can follow it—no jargon, no confusion, no boredom. Then render the document to HTML and deploy it via GitHub Pages.
-
-**Key Requirements:**
-
-- **Simplicity:** Patrick is an auto-mechanic, not a statistician. Write so he can understand.
-- **Conciseness:** 1-5 printed pages. Get to the point.
-- **Beautiful visualizations:** Show all 250 data points clearly.
-- **Logical recommendations:** Defensible advice based on the data.
-- **Confidence assessment:** Explain uncertainty in plain terms. We only have 250 days of data—that's not a lot. Help Patrick understand what ranges of differences he can expect.
-
 ## The Business Problem 🎯
 
 Patrick runs a network of 5 auto repair shops. He's been tracking productivity data (number of cars fixed per day) across all shops, along with whether he (the boss) was present at each shop on each day. 
 
-**The Core Question:** When and where should Patrick schedule his presence to maximize productivity and revenue?
-
-**Key Considerations:**
-
-- Patrick can only be at one shop per day
-- Different shops may respond differently to his presence
-- Revenue depends on number of cars fixed (assume a fixed price per car)
-- Historical patterns may not predict future performance perfectly
-- Patrick loves visiting his brother who runs Shop 3
 
 ::: {.callout-important}
 ## 🎯 The Key Insight: Data-Driven Decision Making
@@ -70,7 +55,7 @@ carsDF = pd.read_csv("carsFixed.csv")
 ```{python}
 #| label: tbl-data-overview
 #| tbl-cap: "Overview of the productivity data"
-#| echo: true
+#| echo: false
 carsDF.head(10)
 ```
 
@@ -84,79 +69,148 @@ carsDF.head(10)
 ```{python}
 #| label: tbl-data-summary
 #| tbl-cap: "Summary statistics by shop and boss presence"
-#| echo: true
+#| echo: false
 summary = carsDF.groupby(['shopID', 'boss'])['carsFixed'].agg(['count', 'mean', 'std', 'min', 'max']).round(2)
 summary
 ```
 
-## Challenge Requirements 📋
+## Analysis: What Does the Data Show? 📈
 
-### Minimum Requirements for Any Points on Challenge
+### Visualizing All 250 Data Points
 
-1. **Create a Quarto Document:** Write a comprehensive quarto markdown file structured as a professional business report. Your final rendered HTML should be a polished, client-ready document that Patrick can use to make decisions. **Important:** Your final rendered HTML should contain only your analysis and recommendations—all challenge instructions, setup guides, and grading rubrics should be removed from the final report.
+Let's visualize all 250 observations to see how productivity varies by shop and whether Patrick (the boss) was present:
 
-2. **Render to HTML:** You must render the quarto markdown file to HTML.
+```{python}
+#| label: fig-all-data-points
+#| fig-cap: "All 250 data points showing daily productivity by shop and boss presence. Each point represents one day. Points are jittered horizontally to reduce overlap."
+#| echo: false
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
-3. **GitHub Repository:** Create a repository named `decAdvocacyChallenge` in your GitHub account. Upload your rendered HTML files to this repository.
+# Set style
+sns.set_style("whitegrid")
+#plt.rcParams['figure.figsize'] = (12, 6)
+plt.rcParams['figure.figsize'] = (8, 6)
 
-4. **GitHub Pages Setup:** The repository should be made the source of your GitHub Pages:
-   - Go to your repository settings (click the "Settings" tab in your GitHub repository)
-   - Scroll down to the "Pages" section in the left sidebar
-   - Under "Source", select "Deploy from a branch"
-   - Choose "main" branch and "/ (root)" folder
-   - Click "Save"
-   - Your site will be available at: `https://[your-username].github.io/decAdvocacyChallenge/`
-   - **Note:** It may take a few minutes for the site to become available after enabling Pages
+# Create figure
+#fig, ax = plt.subplots(figsize=(14, 7))
+fig, ax = plt.subplots(figsize=(8, 7))
 
-## Getting Started: Repository Setup 🚀
+# Prepare data for plotting
+carsDF['boss_label'] = carsDF['boss'].map({0: 'Boss Absent', 1: 'Boss Present'})
+carsDF['shop_label'] = 'Shop ' + carsDF['shopID'].astype(str)
 
-::: {.callout-important}
-## 📁 Quick Start
+# Create strip plot with jitter to show all points
+sns.stripplot(
+    data=carsDF,
+    x='shop_label',
+    y='carsFixed',
+    hue='boss_label',
+    dodge=True,
+    alpha=0.6,
+    size=4,
+    jitter=0.3,
+    ax=ax,
+    palette={'Boss Absent': '#d62728', 'Boss Present': '#2ca02c'}
+)
 
-**Step 1:** Create a new repository named `decAdvocacyChallenge` in your GitHub account by forking the starter repository at [https://github.com/flyaflya/decAdvocacyChallenge.git](https://github.com/flyaflya/decAdvocacyChallenge.git)
+ax.set_xlabel('Shop', fontsize=12, fontweight='bold')
+ax.set_ylabel('Cars Fixed per Day', fontsize=12, fontweight='bold')
+ax.set_title('Productivity by Shop and Boss Presence: All 250 Days of Data', 
+             fontsize=14, fontweight='bold', pad=20)
+ax.legend(title='Boss Status', title_fontsize=11, fontsize=10, loc='upper left')
+ax.grid(True, alpha=0.3)
 
-**Step 2:** Clone the repository locally using Cursor (or VS Code)
+plt.tight_layout()
+plt.show()
+```
 
-**Step 3:** The data file `carsFixed.csv` is already included in this repository. The code will load it from the local file.
+### Which Shops Benefit Most from Patrick's Presence?
 
-**Step 4:** You're ready to start! Modify this `index.qmd` file and begin your analysis.
-:::
+Let's calculate the difference in average productivity when Patrick is present vs. absent for each shop:
 
-::: {.callout-tip}
-## 💡 Why This Approach?
+```{python}
+#| label: tbl-boss-impact
+#| tbl-cap: "Impact of boss presence on productivity by shop"
+#| echo: false
+# Calculate mean productivity by shop and boss presence
+impact = carsDF.groupby(['shopID', 'boss'])['carsFixed'].mean().unstack()
+impact.columns = ['Boss_Absent', 'Boss_Present']
+impact['Difference'] = impact['Boss_Present'] - impact['Boss_Absent']
+impact['Percent_Change'] = (impact['Difference'] / impact['Boss_Absent'] * 100).round(1)
+impact = impact.round(2)
+impact.index.name = 'Shop'
+impact = impact.reset_index()
+impact.columns = ['Shop', 'Avg When Boss Absent', 'Avg When Boss Present', 
+                  'Difference (Cars/Day)', 'Percent Change (%)']
+impact = impact.sort_values('Difference (Cars/Day)', ascending=False)
+impact
+```
 
-**Benefits:**
+```{python}
+#| label: fig-boss-impact
+#| fig-cap: "Average productivity difference when boss is present vs. absent. Positive values mean the shop benefits from Patrick's presence."
+#| echo: false
+fig, ax = plt.subplots(figsize=(8, 6))
+# Calculate differences
+shop_impact = carsDF.groupby(['shopID', 'boss'])['carsFixed'].mean().unstack()
+shop_impact['Difference'] = shop_impact[1] - shop_impact[0]
+shop_impact = shop_impact.sort_values('Difference', ascending=True)
 
-- **Real-world application:** You're solving an actual business problem
-- **Data-driven insights:** Learn to extract actionable insights from data
-- **Professional presentation:** Create a report that a real client would use
-- **Visual storytelling:** Master the art of data visualization for decision-making
-:::
+# Create bar plot
+colors = ['#2ca02c' if x > 0 else '#d62728' for x in shop_impact['Difference']]
+bars = ax.barh(range(1, 6), shop_impact['Difference'], color=colors, alpha=0.7, edgecolor='black', linewidth=1.5)
 
-## Grading Rubric 🎓
+# Add value labels
+for i, (shop, diff) in enumerate(zip(shop_impact.index, shop_impact['Difference'])):
+    ax.text(diff + (0.5 if diff > 0 else -0.5), i+1, 
+           f'{diff:+.1f} cars/day', 
+           va='center', ha='left' if diff > 0 else 'right',
+           fontweight='bold', fontsize=10)
 
-::: {.callout-important}
-## 📊 What You're Really Being Graded On
+ax.axvline(0, color='black', linestyle='-', linewidth=1)
+ax.set_yticks(range(1, 6))
+ax.set_yticklabels([f'Shop {i}' for i in shop_impact.index])
+ax.set_xlabel('Difference in Average Cars Fixed per Day\n(Boss Present - Boss Absent)', 
+             fontsize=12, fontweight='bold')
+ax.set_title('Which Shops Benefit Most from Patrick\'s Presence?', 
+             fontsize=14, fontweight='bold', pad=20)
+ax.grid(True, alpha=0.3, axis='x')
 
-**This is a report for Patrick, an auto-mechanic, not a statistics professor.** Your job is to give him clear, actionable advice he can understand and use. Think of this as a brief consultation report—something he can read in 5 minutes and immediately know what to do.
+plt.tight_layout()
+plt.show()
+```
 
-**Report Format:**
+**Key Findings:**
 
-- **Conciseness:** Aim for 1-5 printed pages. Patrick is busy—get to the point quickly.
-- **Simplicity:** Write so an auto-mechanic can understand. Avoid jargon. Use plain language.
-- **Delete All Challenge Instructions:** Once you've completed your analysis, remove all challenge instructions, setup guides, and grading rubrics from your final rendered HTML. The final report should contain only your analysis, visualizations, and recommendations—nothing else.
-- **Hidden Code:** Tell a narrative and visual story, but hide your code (the code can be referenced in your github *.qmd source file if needed).
-- **Show All Data Points:** When plotting historical data, display all 250 observations (not just summaries). Use transparency, jitter, or other techniques to handle overlapping points.
+```{python}
+#| echo: false
+# Identify which shops benefit most
+impact_analysis = carsDF.groupby(['shopID', 'boss'])['carsFixed'].mean().unstack()
+impact_analysis['Difference'] = impact_analysis[1] - impact_analysis[0]
+impact_analysis = impact_analysis.sort_values('Difference', ascending=False)
 
-**What makes a great report:**
+most_benefit = impact_analysis.index[0]
+least_benefit = impact_analysis.index[-1]
+most_benefit_diff = impact_analysis.loc[most_benefit, 'Difference']
+least_benefit_diff = impact_analysis.loc[least_benefit, 'Difference']
 
-- **Beautiful visualizations:** Clean, clear charts that tell the story at a glance
-- **Logical recommendations:** Defensible advice based on the data, not speculation
-- **Confidence assessment:** Explain uncertainty in plain terms. What ranges of differences can Patrick expect? How confident can he be? (Remember: we only have 250 days of data—that's not a lot.)
-- **Punchy and focused:** Don't bore Patrick with unnecessary analysis. Focus on what matters for his decision.
+# Display findings
+from IPython.display import Markdown
+findings_text = f"""
+Based on the analysis above:
 
-**What we're looking for:** A report Patrick can read, understand, and act on. If he's confused or bored, you've missed the mark.
-:::
+- **Shop {most_benefit} benefits MOST** from Patrick's presence: **+{most_benefit_diff:.1f} cars/day** on average when Patrick is present
+- **Shop {least_benefit} benefits LEAST** (or may be hurt) by Patrick's presence: **{least_benefit_diff:.1f} cars/day** difference
+
+The table and chart above show the complete picture for all 5 shops.
+"""
+Markdown(findings_text)
+```
+
+
+
 
 ### What Your Report Should Include
 
@@ -185,61 +239,15 @@ Your report should answer these questions in a clear, concise way:
 
 **Remember:** Less is more. A focused, punchy report that Patrick can understand and act on is better than a long, complex analysis that confuses him.
 
-## Technical Implementation Preferences 💡
 
-### Setting Up Your Analysis
+##
 
-- Use `pandas` for data manipulation
-- Use `matplotlib` and `seaborn` for visualizations
-- Use `numpy` for numerical calculations if needed
-- Consider using `scipy` for statistical tests if helpful
+The analysis report is based on 250 observations of daily productivity across 5 auto repair shops network owned by Patrick.
 
-### Visualization Preferences
 
-- **Professional Styling:** Use consistent colors, clear labels, readable fonts, and informative titles
-- **Show All Points:** When displaying historical data, ensure all 250 observations are visible (use transparency, jitter, or other techniques)
-- **Color Coding:** Use consistent color schemes (e.g., one color for boss present, another for boss absent)
-- **Interactive Elements:** Consider using plotly for interactive visualizations if helpful (optional)
-
-### Data Loading
-
-The data file `carsFixed.csv` is included in your repository. Load it using pandas:
-
-```python
-import pandas as pd
-carsDF = pd.read_csv("carsFixed.csv")
-```
-
-## Submission Checklist ✅
-
-**Technical Requirements:**
-
-- [ ] Forked repository `decAdvocacyChallenge` from the starter repository
-- [ ] Cloned repository locally using Cursor (or VS Code)
-- [ ] Quarto document created with clear narrative (use this `index.qmd` as a starting point)
-- [ ] Document rendered to HTML successfully
-- [ ] HTML files uploaded to your repository
-- [ ] GitHub Pages enabled and working
-- [ ] Site accessible at `https://[your-username].github.io/decAdvocacyChallenge/`
-
-**Report Quality Requirements:**
-
-- [ ] **Conciseness:** Report is 1-5 printed pages (not a novel)
-- [ ] **Simplicity:** Written so an auto-mechanic can understand (no unnecessary jargon)
-- [ ] **Beautiful visualizations:** Clean, clear charts that tell the story with persuasive titles, meaningful labels, and useful annotations.
-- [ ] **All 250 data points visible:** Historical data shows all observations, not just summaries (on one of the visualizations)
-- [ ] **Logical recommendations:** Defensible advice based on the data
-- [ ] **Confidence assessment:** Uncertainty explained in plain terms Patrick can understand
-- [ ] **Future scenarios:** At least one visualization showing projected outcomes
-- [ ] **Clean final report:** All challenge instructions, setup guides, and grading rubrics removed from final HTML
-- [ ] **Hidden code:** Code is hidden in final report (must be in source .qmd file)
-
-### Resources
-
-- **Quarto Markdown:** [quarto.org/docs/authoring/markdown-basics.html](https://quarto.org/docs/authoring/markdown-basics.html)
-- **Quarto Documentation:** [quarto.org/docs](https://quarto.org/docs)
-- **Python Data Science Handbook:** [jakevdp.github.io/PythonDataScienceHandbook](https://jakevdp.github.io/PythonDataScienceHandbook)
-- **Pandas Documentation:** [pandas.pydata.org/docs](https://pandas.pydata.org/docs)
-- **Matplotlib Gallery:** [matplotlib.org/stable/gallery](https://matplotlib.org/stable/gallery)
-- **Seaborn Tutorial:** [seaborn.pydata.org/tutorial.html](https://seaborn.pydata.org/tutorial.html)
+- Patrick can only be at one shop per day
+- Different shops may respond differently to his presence
+- Revenue depends on number of cars fixed (assume a fixed price per car)
+- Historical patterns may not predict future performance perfectly
+- Patrick loves visiting his brother who runs Shop 3
 
