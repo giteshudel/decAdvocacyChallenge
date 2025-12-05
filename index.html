@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Gitesh Kubal">
-<meta name="dcterms.date" content="2025-12-02">
+<meta name="dcterms.date" content="2025-12-04">
 
 <title>Auto Shop Productivity Analysis Report for Patrick</title>
 <style>
@@ -52,8 +52,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#the-business-problem" id="toc-the-business-problem" class="nav-link active" data-scroll-target="#the-business-problem">The Business Problem 🎯</a></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">The Data 📊</a></li>
+  <li><a href="#the-verdict" id="toc-the-verdict" class="nav-link active" data-scroll-target="#the-verdict">The Verdict 🎯</a></li>
+  <li><a href="#the-data-behind-the-verdict" id="toc-the-data-behind-the-verdict" class="nav-link" data-scroll-target="#the-data-behind-the-verdict">The Data Behind the Verdict 📊</a></li>
   <li><a href="#analysis-what-does-the-data-show" id="toc-analysis-what-does-the-data-show" class="nav-link" data-scroll-target="#analysis-what-does-the-data-show">Analysis: What Does the Data Show? 📈</a>
   <ul class="collapse">
   <li><a href="#visualizing-all-250-data-points" id="toc-visualizing-all-250-data-points" class="nav-link" data-scroll-target="#visualizing-all-250-data-points">Visualizing All 250 Data Points</a></li>
@@ -88,7 +88,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 2, 2025</p>
+      <p class="date">December 4, 2025</p>
     </div>
   </div>
   
@@ -100,139 +100,14 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="the-business-problem" class="level2">
-<h2 class="anchored" data-anchor-id="the-business-problem">The Business Problem 🎯</h2>
-<p>Patrick runs a network of 5 auto repair shops. He’s been tracking productivity data (number of cars fixed per day) across all shops, along with whether he (the boss) was present at each shop on each day.</p>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span>🎯 The Key Insight: Data-Driven Decision Making
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>The problem:</strong> Patrick needs to make scheduling decisions based on data, not intuition. He needs to understand:</p>
-<ul>
-<li>Which shops benefit most from his presence?</li>
-<li>Are there patterns by shop that suggest different strategies?</li>
-<li>What are the revenue and profit implications of different scheduling scenarios?</li>
-<li>How confident can he be in these recommendations?</li>
-</ul>
-<p><strong>Why this matters:</strong> Poor scheduling decisions can lead to:</p>
-<ul>
-<li>Wasted time (Patrick at shops that don’t need him)</li>
-<li>Lost revenue (shops that need him but don’t get him)</li>
-</ul>
-<p><strong>The connection:</strong> This is a real-world decision problem where data analysis can directly impact business outcomes. Your job is to make the data tell a clear, actionable story.</p>
-</div>
-</div>
+<section id="the-verdict" class="level2">
+<h2 class="anchored" data-anchor-id="the-verdict">The Verdict 🎯</h2>
+<p><strong>Patrick, here is what your shops productivity data looks like:</strong> Your overall presence at the shops has a positive impact on productivity. But it matters most at Shop 4 and least at Shop 3.</p>
+<p><strong>Recommendations:</strong> You should prioritize Shop 4 and least at Shop 3.</p>
 </section>
-<section id="the-data" class="level2">
-<h2 class="anchored" data-anchor-id="the-data">The Data 📊</h2>
+<section id="the-data-behind-the-verdict" class="level2">
+<h2 class="anchored" data-anchor-id="the-data-behind-the-verdict">The Data Behind the Verdict 📊</h2>
 <p>The dataset contains 250 observations of daily productivity across 5 shops:</p>
-<div class="cell" data-execution_count="2">
-<div id="tbl-data-overview" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="2">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-data-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Overview of the productivity data
-</figcaption>
-<div aria-describedby="tbl-data-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="37">
-<div>
-
-
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">observation</th>
-<th data-quarto-table-cell-role="th">shopID</th>
-<th data-quarto-table-cell-role="th">boss</th>
-<th data-quarto-table-cell-role="th">carsFixed</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>8</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>2</td>
-<td>2</td>
-<td>0</td>
-<td>22</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>3</td>
-<td>3</td>
-<td>0</td>
-<td>32</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
-<td>4</td>
-<td>4</td>
-<td>1</td>
-<td>64</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
-<td>5</td>
-<td>5</td>
-<td>0</td>
-<td>53</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
-<td>6</td>
-<td>1</td>
-<td>1</td>
-<td>21</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
-<td>7</td>
-<td>2</td>
-<td>0</td>
-<td>20</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
-<td>8</td>
-<td>3</td>
-<td>0</td>
-<td>42</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">8</th>
-<td>9</td>
-<td>4</td>
-<td>0</td>
-<td>31</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">9</th>
-<td>10</td>
-<td>5</td>
-<td>0</td>
-<td>55</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-</figure>
-</div>
-</div>
 <p><strong>Data Dictionary:</strong></p>
 <ul>
 <li><code>observation</code>: Observation number (1-250)</li>
@@ -240,133 +115,6 @@ Table&nbsp;1: Overview of the productivity data
 <li><code>boss</code>: Binary indicator (0 = boss absent, 1 = boss present)</li>
 <li><code>carsFixed</code>: Number of cars fixed that day</li>
 </ul>
-<div class="cell" data-execution_count="3">
-<div id="tbl-data-summary" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="3">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-data-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: Summary statistics by shop and boss presence
-</figcaption>
-<div aria-describedby="tbl-data-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="38">
-<div>
-
-
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">count</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">min</th>
-<th data-quarto-table-cell-role="th">max</th>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">shopID</th>
-<th data-quarto-table-cell-role="th">boss</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th rowspan="2" data-quarto-table-cell-role="th" data-valign="top">1</th>
-<th data-quarto-table-cell-role="th">0</th>
-<td>40</td>
-<td>11.05</td>
-<td>2.93</td>
-<td>5</td>
-<td>17</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>10</td>
-<td>18.00</td>
-<td>3.13</td>
-<td>13</td>
-<td>23</td>
-</tr>
-<tr class="odd">
-<th rowspan="2" data-quarto-table-cell-role="th" data-valign="top">2</th>
-<th data-quarto-table-cell-role="th">0</th>
-<td>45</td>
-<td>22.13</td>
-<td>4.82</td>
-<td>11</td>
-<td>35</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>5</td>
-<td>32.20</td>
-<td>2.59</td>
-<td>29</td>
-<td>35</td>
-</tr>
-<tr class="odd">
-<th rowspan="2" data-quarto-table-cell-role="th" data-valign="top">3</th>
-<th data-quarto-table-cell-role="th">0</th>
-<td>35</td>
-<td>32.46</td>
-<td>5.59</td>
-<td>23</td>
-<td>49</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>15</td>
-<td>35.40</td>
-<td>5.00</td>
-<td>25</td>
-<td>44</td>
-</tr>
-<tr class="odd">
-<th rowspan="2" data-quarto-table-cell-role="th" data-valign="top">4</th>
-<th data-quarto-table-cell-role="th">0</th>
-<td>45</td>
-<td>37.02</td>
-<td>5.61</td>
-<td>26</td>
-<td>51</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>5</td>
-<td>49.80</td>
-<td>10.08</td>
-<td>39</td>
-<td>64</td>
-</tr>
-<tr class="odd">
-<th rowspan="2" data-quarto-table-cell-role="th" data-valign="top">5</th>
-<th data-quarto-table-cell-role="th">0</th>
-<td>35</td>
-<td>45.51</td>
-<td>7.24</td>
-<td>32</td>
-<td>60</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>15</td>
-<td>53.73</td>
-<td>5.31</td>
-<td>45</td>
-<td>62</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-</figure>
-</div>
-</div>
 </section>
 <section id="analysis-what-does-the-data-show" class="level2">
 <h2 class="anchored" data-anchor-id="analysis-what-does-the-data-show">Analysis: What Does the Data Show? 📈</h2>
@@ -378,7 +126,7 @@ Table&nbsp;2: Summary statistics by shop and boss presence
 <div id="fig-all-data-points" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-all-data-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="index_files/figure-html/fig-all-data-points-output-1.png" width="758" height="661" class="figure-img">
+<img src="index_files/figure-html/fig-all-data-points-output-1.png" width="724" height="1330" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-all-data-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: All 250 data points showing daily productivity by shop and boss presence. Each point represents one day. Points are jittered horizontally to reduce overlap.
@@ -395,10 +143,10 @@ Figure&nbsp;1: All 250 data points showing daily productivity by shop and boss p
 <div id="tbl-boss-impact" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="5">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-boss-impact-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: Impact of boss presence on productivity by shop
+Table&nbsp;1: Impact of boss presence on productivity by shop
 </figcaption>
 <div aria-describedby="tbl-boss-impact-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="40">
+<div class="cell-output cell-output-display" data-execution_count="33">
 <div>
 
 
@@ -478,8 +226,8 @@ Figure&nbsp;2: Average productivity difference when boss is present vs.&nbsp;abs
 </div>
 </div>
 <p><strong>Key Findings:</strong></p>
-<div id="991911b8" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="42">
+<div id="00edd933" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="35">
 <p>Based on the analysis above:</p>
 <ul>
 <li><strong>Shop 4 benefits MOST</strong> from Patrick’s presence: <strong>+12.8 cars/day</strong> on average when Patrick is present</li>

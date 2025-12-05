@@ -2,7 +2,7 @@
 title: "Auto Shop Productivity Analysis Report for Patrick"
 subtitle: "Schedule recommendations for maximum productivity and revenue"
 author: "Gitesh Kubal"
-date: December 02, 2025
+date: December 04, 2025
 format:
   html:
     toc: true
@@ -16,30 +16,16 @@ execute:
   eval: true
 ---
 
-## The Business Problem 🎯
+## The Verdict 🎯
 
-Patrick runs a network of 5 auto repair shops. He's been tracking productivity data (number of cars fixed per day) across all shops, along with whether he (the boss) was present at each shop on each day. 
+**Patrick, here is what your shops productivity data looks like:** Your overall presence at the shops has a positive impact on productivity. But it matters most at Shop 4 and least at Shop 3.
+
+**Recommendations:** You should prioritize Shop 4 and least at Shop 3.
 
 
-::: {.callout-important}
-## 🎯 The Key Insight: Data-Driven Decision Making
 
-**The problem:** Patrick needs to make scheduling decisions based on data, not intuition. He needs to understand:
 
-- Which shops benefit most from his presence?
-- Are there patterns by shop that suggest different strategies?
-- What are the revenue and profit implications of different scheduling scenarios?
-- How confident can he be in these recommendations?
-
-**Why this matters:** Poor scheduling decisions can lead to:
-
-- Wasted time (Patrick at shops that don't need him)
-- Lost revenue (shops that need him but don't get him)
-
-**The connection:** This is a real-world decision problem where data analysis can directly impact business outcomes. Your job is to make the data tell a clear, actionable story.
-:::
-
-## The Data 📊
+## The Data Behind the Verdict 📊
 
 The dataset contains 250 observations of daily productivity across 5 shops:
 
@@ -56,7 +42,7 @@ carsDF = pd.read_csv("carsFixed.csv")
 #| label: tbl-data-overview
 #| tbl-cap: "Overview of the productivity data"
 #| echo: false
-carsDF.head(10)
+#carsDF.head(10)
 ```
 
 **Data Dictionary:**
@@ -70,8 +56,8 @@ carsDF.head(10)
 #| label: tbl-data-summary
 #| tbl-cap: "Summary statistics by shop and boss presence"
 #| echo: false
-summary = carsDF.groupby(['shopID', 'boss'])['carsFixed'].agg(['count', 'mean', 'std', 'min', 'max']).round(2)
-summary
+#summary = carsDF.groupby(['shopID', 'boss'])['carsFixed'].agg(['count', 'mean', 'std', 'min', 'max']).round(2)
+#summary
 ```
 
 ## Analysis: What Does the Data Show? 📈
@@ -90,39 +76,83 @@ import numpy as np
 
 # Set style
 sns.set_style("whitegrid")
-#plt.rcParams['figure.figsize'] = (12, 6)
-plt.rcParams['figure.figsize'] = (8, 6)
 
-# Create figure
-#fig, ax = plt.subplots(figsize=(14, 7))
-fig, ax = plt.subplots(figsize=(8, 7))
+# Import for KDE
+from scipy.stats import gaussian_kde
+
+# Create figure with 5 subplots stacked vertically with shared x-axis
+fig, axes = plt.subplots(5, 1, figsize=(8, 14), sharex=True)
+fig.suptitle('Productivity Distribution by Shop and Boss Presence: All 250 Days of Data', 
+             fontsize=14, fontweight='bold', y=0.995)
 
 # Prepare data for plotting
 carsDF['boss_label'] = carsDF['boss'].map({0: 'Boss Absent', 1: 'Boss Present'})
-carsDF['shop_label'] = 'Shop ' + carsDF['shopID'].astype(str)
 
-# Create strip plot with jitter to show all points
-sns.stripplot(
-    data=carsDF,
-    x='shop_label',
-    y='carsFixed',
-    hue='boss_label',
-    dodge=True,
-    alpha=0.6,
-    size=4,
-    jitter=0.3,
-    ax=ax,
-    palette={'Boss Absent': '#d62728', 'Boss Present': '#2ca02c'}
-)
+# Determine common bin range based on all data for consistent comparison
+all_cars = carsDF['carsFixed']
+common_bins = np.arange(all_cars.min(), all_cars.max() + 2, 2)
+x_range = np.linspace(all_cars.min(), all_cars.max(), 200)
 
-ax.set_xlabel('Shop', fontsize=12, fontweight='bold')
-ax.set_ylabel('Cars Fixed per Day', fontsize=12, fontweight='bold')
-ax.set_title('Productivity by Shop and Boss Presence: All 250 Days of Data', 
-             fontsize=14, fontweight='bold', pad=20)
-ax.legend(title='Boss Status', title_fontsize=11, fontsize=10, loc='upper left')
-ax.grid(True, alpha=0.3)
+# Create histogram for each shop
+for shop_id in range(1, 6):
+    ax = axes[shop_id - 1]
+    shop_data = carsDF[carsDF['shopID'] == shop_id]
+    
+    # Get data for boss absent and present
+    boss_absent = shop_data[shop_data['boss'] == 0]['carsFixed']
+    boss_present = shop_data[shop_data['boss'] == 1]['carsFixed']
+    
+    # Calculate statistics
+    mean_absent = boss_absent.mean()
+    mean_present = boss_present.mean()
+    diff = mean_present - mean_absent
+    n_absent = len(boss_absent)
+    n_present = len(boss_present)
+    
+    # Plot histograms with common bins
+    n_absent_hist, bins_absent, patches_absent = ax.hist(boss_absent, bins=common_bins, alpha=0.6, color='#5dade2', 
+            label=f'Boss Absent (n={n_absent}, avg={mean_absent:.1f})', 
+            edgecolor='black', linewidth=0.5)
+    n_present_hist, bins_present, patches_present = ax.hist(boss_present, bins=common_bins, alpha=0.6, color='#2ca02c', 
+            label=f'Boss Present (n={n_present}, avg={mean_present:.1f})', 
+            edgecolor='black', linewidth=0.5)
+    
+    # Add KDE distribution curves
+    if len(boss_absent) > 1:
+        kde_absent = gaussian_kde(boss_absent)
+        density_absent = kde_absent(x_range)
+        # Scale density to match histogram frequency scale
+        bin_width = common_bins[1] - common_bins[0]
+        scaled_density_absent = density_absent * n_absent * bin_width
+        ax.plot(x_range, scaled_density_absent, color='#5dade2', linewidth=2.5, alpha=0.9, linestyle='-')
+    
+    if len(boss_present) > 1:
+        kde_present = gaussian_kde(boss_present)
+        density_present = kde_present(x_range)
+        # Scale density to match histogram frequency scale
+        scaled_density_present = density_present * n_present * bin_width
+        ax.plot(x_range, scaled_density_present, color='#2ca02c', linewidth=2.5, alpha=0.9, linestyle='-')
+    
+    # Add delta label with difference (floating, positioned to avoid legend)
+    y_max = ax.get_ylim()[1]
+    delta_text = f"Δ {diff:+.1f}"
+    diff_color = '#2ca02c' if diff > 0 else '#5dade2' if diff < 0 else 'gray'
+    ax.text(0.98, 0.75, delta_text, transform=ax.transAxes, 
+            fontsize=10, fontweight='bold', color='white',
+            verticalalignment='top', horizontalalignment='right',
+            bbox=dict(boxstyle='round', facecolor=diff_color, alpha=1.0, edgecolor=diff_color, linewidth=2))
+    
+    # Customize each subplot
+    ax.set_title(f'Shop {shop_id}', fontsize=11, fontweight='bold', pad=5)
+    ax.set_ylabel('Number of Days', fontsize=9)
+    ax.grid(True, alpha=0.3, axis='y')
+    # Position legend in upper right corner
+    ax.legend(fontsize=7, loc='upper right', framealpha=0.95)
 
-plt.tight_layout()
+# Only show x-axis label on the bottom subplot
+axes[-1].set_xlabel('Cars Fixed per Day', fontsize=11, fontweight='bold')
+
+plt.tight_layout(pad=2.0, h_pad=1.5)
 plt.show()
 ```
 
@@ -159,7 +189,7 @@ shop_impact['Difference'] = shop_impact[1] - shop_impact[0]
 shop_impact = shop_impact.sort_values('Difference', ascending=True)
 
 # Create bar plot
-colors = ['#2ca02c' if x > 0 else '#d62728' for x in shop_impact['Difference']]
+colors = ['#2ca02c' if x > 0 else '#5dade2' for x in shop_impact['Difference']]
 bars = ax.barh(range(1, 6), shop_impact['Difference'], color=colors, alpha=0.7, edgecolor='black', linewidth=1.5)
 
 # Add value labels
