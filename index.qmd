@@ -1,8 +1,8 @@
 ---
 title: "Auto Shop Productivity Analysis Report for Patrick"
 subtitle: "Schedule recommendations for maximum productivity and revenue"
-author: "Gitesh Kubal"
-date: December 04, 2025
+author: "GK Consulting LLC"
+date: December 08, 2025
 format:
   html:
     toc: true
@@ -16,7 +16,7 @@ execute:
   eval: true
 ---
 
-## The Verdict 🎯
+## The Bottom Line 🎯
 
 **Patrick, here is what your shops productivity data looks like:** Your overall presence at the shops has a positive impact on productivity. But it matters most at Shop 4 and least at Shop 3.
 
@@ -24,10 +24,6 @@ execute:
 
 
 
-
-## The Data Behind the Verdict 📊
-
-The dataset contains 250 observations of daily productivity across 5 shops:
 
 ```{python}
 #| echo: false
@@ -45,12 +41,7 @@ carsDF = pd.read_csv("carsFixed.csv")
 #carsDF.head(10)
 ```
 
-**Data Dictionary:**
 
-- `observation`: Observation number (1-250)
-- `shopID`: Shop identifier (1-5)
-- `boss`: Binary indicator (0 = boss absent, 1 = boss present)
-- `carsFixed`: Number of cars fixed that day
 
 ```{python}
 #| label: tbl-data-summary
@@ -62,9 +53,7 @@ carsDF = pd.read_csv("carsFixed.csv")
 
 ## Analysis: What Does the Data Show? 📈
 
-### Visualizing All 250 Data Points
-
-Let's visualize all 250 observations to see how productivity varies by shop and whether Patrick (the boss) was present:
+We vizualized all 250 observations to see how productivity varies by each of your shops where Patrick (the boss) was present or absent:
 
 ```{python}
 #| label: fig-all-data-points
@@ -156,7 +145,7 @@ plt.tight_layout(pad=2.0, h_pad=1.5)
 plt.show()
 ```
 
-### Which Shops Benefit Most from Patrick's Presence?
+### Which Shops Benefit Most from The Boss's Presence?
 
 Let's calculate the difference in average productivity when Patrick is present vs. absent for each shop:
 
@@ -239,45 +228,415 @@ The table and chart above show the complete picture for all 5 shops.
 Markdown(findings_text)
 ```
 
+## Recommendations for the Boss 💡
+
+### Priority Ranking: Which Shops to Visit Most
+
+Based on the data analysis, here's your clear action plan with the financial impact:
+
+```{python}
+#| echo: false
+# Calculate priority ranking and financial impact
+impact_analysis = carsDF.groupby(['shopID', 'boss'])['carsFixed'].mean().unstack()
+impact_analysis['Difference'] = impact_analysis[1] - impact_analysis[0]
+impact_analysis = impact_analysis.sort_values('Difference', ascending=False)
+
+# Calculate annual impact (assuming 250 working days per year, similar to data period)
+# Assuming Patrick can visit each shop 50 days per year (250 days / 5 shops)
+days_per_shop = 50
+price_per_car = 100  # Example: $100 per car (you can adjust this)
+
+# Calculate additional revenue per shop if Patrick visits
+impact_analysis['Additional_Cars_Annual'] = impact_analysis['Difference'] * days_per_shop
+impact_analysis['Additional_Revenue_Annual'] = impact_analysis['Additional_Cars_Annual'] * price_per_car
+
+# Create priority ranking
+priority_ranking = impact_analysis[['Difference', 'Additional_Cars_Annual', 'Additional_Revenue_Annual']].copy()
+priority_ranking = priority_ranking.sort_values('Difference', ascending=False)
+priority_ranking.columns = ['Impact (Cars/Day)', 'Extra Cars/Year', 'Extra Revenue/Year ($)']
+priority_ranking = priority_ranking.round(1)
+
+# Store values for display in markdown
+shop1 = int(priority_ranking.index[0])
+shop2 = int(priority_ranking.index[1])
+shop3 = int(priority_ranking.index[2])
+shop4 = int(priority_ranking.index[3])
+shop5 = int(priority_ranking.index[4])
+
+impact1 = float(priority_ranking.loc[priority_ranking.index[0], 'Impact (Cars/Day)'])
+impact2 = float(priority_ranking.loc[priority_ranking.index[1], 'Impact (Cars/Day)'])
+impact3 = float(priority_ranking.loc[priority_ranking.index[2], 'Impact (Cars/Day)'])
+impact4 = float(priority_ranking.loc[priority_ranking.index[3], 'Impact (Cars/Day)'])
+impact5 = float(priority_ranking.loc[priority_ranking.index[4], 'Impact (Cars/Day)'])
+
+cars1 = float(priority_ranking.loc[priority_ranking.index[0], 'Extra Cars/Year'])
+cars2 = float(priority_ranking.loc[priority_ranking.index[1], 'Extra Cars/Year'])
+cars3 = float(priority_ranking.loc[priority_ranking.index[2], 'Extra Cars/Year'])
+cars4 = float(priority_ranking.loc[priority_ranking.index[3], 'Extra Cars/Year'])
+cars5 = float(priority_ranking.loc[priority_ranking.index[4], 'Extra Cars/Year'])
+
+revenue1 = float(priority_ranking.loc[priority_ranking.index[0], 'Extra Revenue/Year ($)'])
+revenue2 = float(priority_ranking.loc[priority_ranking.index[1], 'Extra Revenue/Year ($)'])
+revenue3 = float(priority_ranking.loc[priority_ranking.index[2], 'Extra Revenue/Year ($)'])
+revenue4 = float(priority_ranking.loc[priority_ranking.index[3], 'Extra Revenue/Year ($)'])
+revenue5 = float(priority_ranking.loc[priority_ranking.index[4], 'Extra Revenue/Year ($)'])
+```
 
 
 
-### What Your Report Should Include
 
-Your report should answer these questions in a clear, concise way:
+**Financial Impact Summary:**
 
-1. **What does the data show?**
+```{python}
+#| label: tbl-financial-impact
+#| tbl-cap: "Annual financial impact of prioritizing shops by Patrick's presence impact"
+#| echo: false
+priority_ranking_display = priority_ranking.copy()
+priority_ranking_display.index.name = 'Shop'
+priority_ranking_display = priority_ranking_display.reset_index()
+priority_ranking_display['Priority'] = range(1, 6)
+priority_ranking_display = priority_ranking_display[['Priority', 'Shop', 'Impact (Cars/Day)', 'Extra Cars/Year', 'Extra Revenue/Year ($)']]
+priority_ranking_display
+```
 
-   - Visualize all 250 data points showing productivity by shop and boss presence
-   - Which shops benefit most from Patrick's presence? Which don't?
+**Note:** These calculations assume $100 per car. Adjust based on your actual pricing.
 
-2. **What should Patrick do?**
+```{python}
+#| echo: false
+# Generate key takeaway text
+from IPython.display import Markdown
 
-   - Clear, specific recommendations: Which shops should he prioritize? Why?
-   - What's the potential financial impact? (Revenue or profit implications)
+revenue_diff = abs(priority_ranking.loc[priority_ranking.index[0], 'Extra Revenue/Year ($)'] - priority_ranking.loc[priority_ranking.index[4], 'Extra Revenue/Year ($)'])
+takeaway_text = f"""
+**Key Takeaway:** By focusing your visits on the shops that benefit most from your presence, you can maximize your impact. If you visit **Shop #{priority_ranking.index[0]}** for 50 days instead of **Shop #{priority_ranking.index[4]}**, you'd generate approximately **${revenue_diff:,.0f} more revenue per year** (assuming equal visit days).
+"""
+Markdown(takeaway_text)
+```
 
-3. **How confident can Patrick be?**
+## How Confident Can Patrick Be? 🎲
 
-   - Explain uncertainty in plain terms an auto-mechanic can understand
-   - What ranges of differences can he expect? (We only have 250 days—that's not a huge sample)
-   - What could go wrong? What assumptions are you making?
+### Understanding Uncertainty: What to Expect
 
-4. **What does the future look like?**
+**The Bottom Line:** We have 250 days of data—that's about 10 months of business. It's enough to see patterns, but not enough to be 100% certain. Think of it like checking your oil: you can see if it's low, but you can't predict exactly when you'll need to change it next.
 
-   - Show at least one visualization of projected outcomes under different scheduling scenarios
-   - Help Patrick see the potential impact of following your recommendations
+### What Ranges of Differences Can You Expect?
 
-**Remember:** Less is more. A focused, punchy report that Patrick can understand and act on is better than a long, complex analysis that confuses him.
+```{python}
+#| echo: false
+# Calculate confidence intervals and ranges
+from scipy import stats
+import numpy as np
+
+confidence_ranges = {}
+for shop_id in range(1, 6):
+    shop_data = carsDF[carsDF['shopID'] == shop_id]
+    boss_absent = shop_data[shop_data['boss'] == 0]['carsFixed']
+    boss_present = shop_data[shop_data['boss'] == 1]['carsFixed']
+    
+    if len(boss_absent) > 1 and len(boss_present) > 1:
+        # Calculate mean difference
+        mean_diff = boss_present.mean() - boss_absent.mean()
+        
+        # Calculate standard error for the difference
+        se_absent = boss_absent.std() / np.sqrt(len(boss_absent))
+        se_present = boss_present.std() / np.sqrt(len(boss_present))
+        se_diff = np.sqrt(se_absent**2 + se_present**2)
+        
+        # 95% confidence interval (rough estimate)
+        margin_error = 1.96 * se_diff
+        lower_bound = mean_diff - margin_error
+        upper_bound = mean_diff + margin_error
+        
+        confidence_ranges[shop_id] = {
+            'mean_diff': mean_diff,
+            'lower': lower_bound,
+            'upper': upper_bound,
+            'range': upper_bound - lower_bound
+        }
+
+# Display confidence ranges
+from IPython.display import Markdown
+confidence_text = """
+**Here's what the data suggests for each shop (with realistic ranges):**
+
+"""
+for shop_id in sorted(confidence_ranges.keys()):
+    cr = confidence_ranges[shop_id]
+    confidence_text += f"""
+**Shop {shop_id}:**
+- **Best estimate:** {cr['mean_diff']:+.1f} cars/day when you're present
+
+- **Realistic range:** {cr['lower']:+.1f} to {cr['upper']:+.1f} cars/day
+
+- **What this means:** Your impact is likely somewhere in this range, not exactly the average
+
+"""
+confidence_text += """
+**Remember:** These are estimates based on past data. Future results may vary, but they'll likely fall within these ranges.
+"""
+Markdown(confidence_text)
+```
+
+### What Could Go Wrong? What Assumptions Are We Making?
+
+**Assumptions We're Making:**
+
+1. **The past predicts the future** - We're assuming that what happened in these 250 days will continue. But things change:
+   - Your shops might get better (or worse) over time
+   - New employees or equipment could change productivity
+   - Seasonal patterns (busy seasons, slow seasons) might affect results
+
+2. **Your presence causes the difference** - We're assuming that when you're there, you're the reason productivity changes. But:
+   - Maybe you visit certain shops on busier days
+   - Maybe other factors (weather, local events) affect both your visits and productivity
+   - Maybe the shops are just naturally different
+
+3. **Equal visit days** - Our financial calculations assume you can visit each shop equally. But:
+   - Some shops might be farther away
+   - You might prefer visiting your brother at Shop 3
+   - Some shops might need you more on certain days
+
+**What Could Go Wrong:**
+
+- **Small sample sizes:** Some shops have fewer days of data when you were present. Shop 2, for example, only has 5 days with you present—that's not much to go on.
+- **Natural variation:** Even if you do everything the same, productivity will vary day to day. A bad week doesn't mean the strategy is wrong.
+- **External factors:** Things we can't control (weather, local economy, competition) could affect results differently than expected.
+- **The "brother factor":** You mentioned you love visiting Shop 3 because your brother runs it. If that's important to you, factor that in—even if the data says otherwise.
+
+**Bottom Line on Confidence:**
+
+- **High confidence:** Shop 4 and Shop 1 show clear benefits from your presence. The patterns are strong and consistent.
+- **Medium confidence:** Shop 2 and Shop 5 show some benefit, but with less data, we're less certain.
+- **Lower confidence:** Shop 3 shows minimal or negative impact, but this might be due to limited data or other factors.
+
+**Our Recommendation:** Start with the shops we're most confident about (Shop 4, then Shop 1). Track your results for a few months, then adjust. Think of this like tuning a car—you make an adjustment, test it, and fine-tune based on what you see.
 
 
-##
+## What Does the Future Look Like? 🔮
 
-The analysis report is based on 250 observations of daily productivity across 5 auto repair shops network owned by Patrick.
+### Projected Outcomes Under Different Scheduling Scenarios
 
 
-- Patrick can only be at one shop per day
-- Different shops may respond differently to his presence
-- Revenue depends on number of cars fixed (assume a fixed price per car)
-- Historical patterns may not predict future performance perfectly
-- Patrick loves visiting his brother who runs Shop 3
+Let's see what happens if you follow different scheduling strategies. We'll compare three scenarios over a full year (250 working days):
+
+
+```{python}
+```
+
+
+
+
+```{python}
+#| echo: false
+# Calculate projected outcomes for different scheduling scenarios
+import matplotlib.pyplot as plt
+import numpy as np
+
+working_days = 250
+price_per_car = 100
+
+# Get impact data
+impact_data = carsDF.groupby(['shopID', 'boss'])['carsFixed'].mean().unstack()
+impact_data['Difference'] = impact_data[1] - impact_data[0]
+impact_data['Base_Productivity'] = impact_data[0]  # When boss is absent
+
+# Scenario 1: Current/Equal Distribution (visit each shop equally - 50 days each)
+scenario1_visits = {1: 50, 2: 50, 3: 50, 4: 50, 5: 50}
+scenario1_name = "Equal Distribution (Current)"
+
+# Scenario 2: Data-Driven Priority (focus on shops with highest impact)
+# Visit top 3 shops more: Shop 4 (80 days), Shop 1 (70 days), Shop 2 (50 days), Shop 5 (30 days), Shop 3 (20 days)
+scenario2_visits = {1: 70, 2: 50, 3: 20, 4: 80, 5: 30}
+scenario2_name = "Data-Driven Priority"
+
+# Scenario 3: Brother Preference (visit Shop 3 more, but still prioritize high-impact shops)
+# Shop 4 (70 days), Shop 1 (60 days), Shop 3 (50 days - brother), Shop 2 (40 days), Shop 5 (30 days)
+scenario3_visits = {1: 60, 2: 40, 3: 50, 4: 70, 5: 30}
+scenario3_name = "Balanced (Brother + Data)"
+
+def calculate_scenario_outcome(visits_dict, impact_data, working_days, price_per_car):
+    total_cars = 0
+    total_revenue = 0
+    shop_details = {}
+    
+    for shop_id in range(1, 6):
+        days_visited = visits_dict[shop_id]
+        days_not_visited = working_days - days_visited
+        
+        # Calculate cars fixed
+        cars_when_present = (impact_data.loc[shop_id, 'Base_Productivity'] + impact_data.loc[shop_id, 'Difference']) * days_visited
+        cars_when_absent = impact_data.loc[shop_id, 'Base_Productivity'] * days_not_visited
+        total_cars_shop = cars_when_present + cars_when_absent
+        
+        # Calculate additional cars from visits
+        additional_cars = impact_data.loc[shop_id, 'Difference'] * days_visited
+        
+        total_cars += total_cars_shop
+        shop_details[shop_id] = {
+            'total_cars': total_cars_shop,
+            'additional_cars': additional_cars,
+            'revenue': total_cars_shop * price_per_car
+        }
+    
+    total_revenue = total_cars * price_per_car
+    
+    # Calculate baseline (if never visited)
+    baseline_cars = sum(impact_data['Base_Productivity'] * working_days)
+    baseline_revenue = baseline_cars * price_per_car
+    
+    # Calculate improvement
+    additional_cars_total = total_cars - baseline_cars
+    additional_revenue = total_revenue - baseline_revenue
+    
+    return {
+        'total_cars': total_cars,
+        'total_revenue': total_revenue,
+        'additional_cars': additional_cars_total,
+        'additional_revenue': additional_revenue,
+        'baseline_cars': baseline_cars,
+        'baseline_revenue': baseline_revenue,
+        'shop_details': shop_details
+    }
+
+# Calculate all scenarios
+scenario1 = calculate_scenario_outcome(scenario1_visits, impact_data, working_days, price_per_car)
+scenario2 = calculate_scenario_outcome(scenario2_visits, impact_data, working_days, price_per_car)
+scenario3 = calculate_scenario_outcome(scenario3_visits, impact_data, working_days, price_per_car)
+
+# Prepare data for plots
+scenarios = [scenario1_name, scenario2_name, scenario3_name]
+revenues = [scenario1['total_revenue'], scenario2['total_revenue'], scenario3['total_revenue']]
+additional_revenues = [scenario1['additional_revenue'], scenario2['additional_revenue'], scenario3['additional_revenue']]
+additional_cars = [scenario1['additional_cars'], scenario2['additional_cars'], scenario3['additional_cars']]
+```
+
+```{python}
+#| echo: false
+#| label: fig-revenue-comparison
+#| fig-cap: "Projected Annual Revenue by Scheduling Strategy"
+# Plot 1: Total Revenue Comparison
+fig, ax1 = plt.subplots(figsize=(8, 6))
+
+x_pos = np.arange(len(scenarios))
+width = 0.35
+
+bars1 = ax1.bar(x_pos - width/2, [s['baseline_revenue'] for s in [scenario1, scenario2, scenario3]], 
+                width, label='Baseline (No Visits)', color='#cccccc', alpha=0.7)
+bars2 = ax1.bar(x_pos + width/2, revenues, width, label='Total Revenue', color='#2ca02c', alpha=0.8)
+
+# Add value labels
+for i, (rev, add_rev) in enumerate(zip(revenues, additional_revenues)):
+    ax1.text(i, rev + 5000, f'${rev:,.0f}\n(+${add_rev:,.0f})', 
+            ha='center', va='bottom', fontweight='bold', fontsize=9)
+
+ax1.set_xlabel('Scheduling Scenario', fontsize=12, fontweight='bold')
+ax1.set_ylabel('Annual Revenue ($)', fontsize=12, fontweight='bold')
+ax1.set_title('Projected Annual Revenue by Scheduling Strategy', fontsize=13, fontweight='bold', pad=15)
+ax1.set_xticks(x_pos)
+ax1.set_xticklabels([s.replace(' ', '\n') for s in scenarios], fontsize=9)
+ax1.legend(fontsize=10, loc='upper right')
+ax1.set_ylim(top=6000000)  # Extend Y axis up to $6 million
+ax1.grid(True, alpha=0.3, axis='y')
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| label: fig-additional-cars
+#| fig-cap: "Extra Productivity from Strategic Scheduling"
+# Plot 2: Additional Cars Fixed
+fig, ax2 = plt.subplots(figsize=(8, 6))
+
+colors_bar = ['#5dade2', '#2ca02c', '#ffa500']
+
+bars = ax2.bar(scenarios, additional_cars, color=colors_bar, alpha=0.8, edgecolor='black', linewidth=1.5)
+
+# Add value labels
+for bar, cars in zip(bars, additional_cars):
+    height = bar.get_height()
+    ax2.text(bar.get_x() + bar.get_width()/2., height + 5,
+            f'+{cars:.0f} cars',
+            ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+ax2.set_xlabel('Scheduling Scenario', fontsize=12, fontweight='bold')
+ax2.set_ylabel('Additional Cars Fixed per Year', fontsize=12, fontweight='bold')
+ax2.set_title('Extra Productivity from Strategic Scheduling', fontsize=13, fontweight='bold', pad=15)
+ax2.set_xticks(range(len(scenarios)))
+ax2.set_xticklabels([s.replace(' ', '\n') for s in scenarios], fontsize=9)
+ax2.grid(True, alpha=0.3, axis='y')
+ax2.axhline(0, color='black', linestyle='-', linewidth=1)
+
+plt.tight_layout()
+plt.show()
+```
+
+### Scenario Comparison Summary
+
+```{python}
+#| label: tbl-scenario-comparison
+#| tbl-cap: "Detailed comparison of scheduling scenarios"
+#| echo: false
+import pandas as pd
+
+comparison_data = {
+    'Scenario': [scenario1_name, scenario2_name, scenario3_name],
+    'Total Cars/Year': [scenario1['total_cars'], scenario2['total_cars'], scenario3['total_cars']],
+    'Total Revenue ($)': [scenario1['total_revenue'], scenario2['total_revenue'], scenario3['total_revenue']],
+    'Extra Cars vs Baseline': [scenario1['additional_cars'], scenario2['additional_cars'], scenario3['additional_cars']],
+    'Extra Revenue vs Baseline ($)': [scenario1['additional_revenue'], scenario2['additional_revenue'], scenario3['additional_revenue']]
+}
+
+comparison_df = pd.DataFrame(comparison_data)
+comparison_df = comparison_df.round(0)
+comparison_df['Total Revenue ($)'] = comparison_df['Total Revenue ($)'].apply(lambda x: f"${x:,.0f}")
+comparison_df['Extra Revenue vs Baseline ($)'] = comparison_df['Extra Revenue vs Baseline ($)'].apply(lambda x: f"${x:+,.0f}")
+comparison_df
+```
+
+**Key Insights:**
+
+```{python}
+#| echo: false
+# Generate insights text with calculated values
+from IPython.display import Markdown
+
+revenue_diff_2_3 = scenario2['additional_revenue'] - scenario3['additional_revenue']
+revenue_diff_2_1 = scenario2['additional_revenue'] - scenario1['additional_revenue']
+cars_diff_2_1 = scenario2['additional_cars'] - scenario1['additional_cars']
+
+insights_text = f"""
+1. **Data-Driven Priority (Scenario 2)** generates the most revenue by focusing on shops where your presence has the biggest impact (Shop 4 and Shop 1).
+
+2. **Balanced Approach (Scenario 3)** still performs well while allowing you to visit your brother at Shop 3 more often—you only lose about **${revenue_diff_2_3:,.0f}** compared to the pure data-driven approach.
+
+3. **Equal Distribution (Scenario 1)** is the safest but least optimal—you're spreading yourself too thin and missing opportunities at high-impact shops.
+
+**The Bottom Line:** By following the data-driven priority strategy, you could generate approximately **${revenue_diff_2_1:,.0f} more revenue per year** compared to visiting each shop equally. That's like fixing an extra **{cars_diff_2_1:.0f} cars** per year just by being smarter about where you spend your time!
+"""
+Markdown(insights_text)
+```
+
+
+
+
+## *Appendix*
+
+*The analysis report is based on 250 observations of daily productivity across 5 auto repair shops network owned by Patrick.*
+
+***Data Dictionary:***
+
+- *`observation`: Observation number (1-250)*
+- *`shopID`: Shop identifier (1-5)*
+- *`boss`: Binary indicator (0 = boss absent, 1 = boss present)*
+- *`carsFixed`: Number of cars fixed that day*
+
+***Key Points:***
+
+- *Patrick can only be at one shop per day*
+- *Different shops may respond differently to his presence*
+- *Revenue depends on number of cars fixed (assume a fixed price per car)*
+- *Historical patterns may not predict future performance perfectly*
+- *Patrick loves visiting his brother who runs Shop 3*
 
